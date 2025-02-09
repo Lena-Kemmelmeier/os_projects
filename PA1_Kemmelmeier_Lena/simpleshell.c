@@ -7,11 +7,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/wait.h>
-#include <sys/types.h>
+//#include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 
 // function prototypes
 int parseInput(char* input, char splitWords[][500], int maxWords);
@@ -196,7 +196,7 @@ int executeCommand(char* const* enteredCommand, const char* infile, const char* 
         }
         if(execvp(enteredCommand[0], enteredCommand) == -1) {
             fprintf(stderr, "exec Failed: %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
+            _exit(EXIT_FAILURE);
         }
         else{
             result = 0;
@@ -205,7 +205,6 @@ int executeCommand(char* const* enteredCommand, const char* infile, const char* 
     else{ // we are in parent process - wait for child to finish
         int waitResult;
         wait(&waitResult);
-        //waitpid(pid, &waitResult, 0);
 
         if (WIFEXITED(waitResult)) {
             printf("Child finished with error status: %d\n", WEXITSTATUS(waitResult));
