@@ -25,6 +25,7 @@ int main(){
 
         // initialize variables
         int maxStringLength = 500; // arbitrary limit on the string
+        int maxNumWords = 500; // arbitrary limit
         char cwd[maxStringLength]; // statically allocated
         char cli[maxStringLength]; // this is the input from user in CLI, statically allocated
         char *netID = "lkemmelmeier"; // my NetID, for the prompt
@@ -38,12 +39,17 @@ int main(){
         //printf("%s",input); // check - are we getting the input correctly?
 
         // parse the input to the user
-        char separatedInput[maxStringLength][500]; // allocate 2d static arr that will store the parsed strings
+        char separatedInput[maxNumWords][maxStringLength]; // allocate 2d static arr that will store the parsed strings
         int validElements; // the valid number of cli elements
         // here, 500 is the max number of strings/words (see function prototype we were given in the class materials)
         validElements = parseInput(cli,separatedInput, maxStringLength); 
+        //printf("num valid elements: %d\n",validElements); // check - correct number of valid elements
 
-        printf("num valid elements: %d\n",validElements);
+        // check - what do the contents of the 2d array look like?
+        for (int i = 0; i < validElements; i++){
+            char* currentString = separatedInput[i];
+            printf("current string: %s\n",currentString);
+        }
         
     //}
     
@@ -57,10 +63,11 @@ int parseInput(char* input, char splitWords[][500], int maxWords){
 
     // check - does strtok work?
     while(word != NULL && wordCount < maxWords){
-        printf("Word: %s\n", word);
-        word = strtok(NULL, " ");
-        //strcpy(splitWords[wordCount], word);
+        //printf("Word: %s\n", word); // check - are we parsing correctly?
+        strcpy(splitWords[wordCount], word);
         wordCount++;
+        word = strtok(NULL, " ");
+
     }
 
     return wordCount;
