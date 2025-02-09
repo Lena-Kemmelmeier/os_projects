@@ -59,20 +59,22 @@ int main(){
     
         // check if we should run the change dir function
         if((strcmp(firstElement,"cd") == 0) || strcmp(firstElement,"cd\n") == 0){
-            printf("run the cd command!\n"); // check
 
             // printf("num valid elements: %d\n",numValidElements); // check - correct number of valid elements
-
 
             // make sure that this command has two and only two inputs (i.e. cd and something else)
             if(numValidElements != 2){
                 printf("Path Not Formatted Correctly!\n");
             }
+            else{
+                printf("run the cd command!\n"); // check
+                char* path = separatedInput[1];
+                changeDirectories(path);
+            }
         }
 
 
         count++;
-
         // put a stop to the for loop when necessary
         if (count > 4){
              break;
@@ -103,5 +105,9 @@ int parseInput(char* input, char splitWords[][500], int maxWords){
 }
 
 void changeDirectories(const char* path){
+    int chDirResult = chdir(path);
 
+    if(chDirResult == -1){
+        printf("chdir Failed: %s\n", strerror(errno));
+    }
 }
