@@ -28,8 +28,6 @@ int main(){
     char cli[maxStringLength]; // this is the input from user in CLI, statically allocated
     char *netID = "lkemmelmeier"; // my NetID, for the prompt
 
-    int count = 0;
-
     for(;;){ // start of for loop, loop until the user chooses too - this is the example of an infinite loop from the class materials
 
         getcwd(cwd, maxStringLength); // gets the current working directory, this is stored in cwd
@@ -58,7 +56,7 @@ int main(){
         // printf("first elements: %s\n",firstElement);
     
         // check if we should run the change dir function
-        if((strcmp(firstElement,"cd") == 0) || strcmp(firstElement,"cd\n") == 0){
+        if(strcmp(firstElement, "cd") == 0){
 
             // printf("num valid elements: %d\n",numValidElements); // check - correct number of valid elements
 
@@ -67,24 +65,18 @@ int main(){
                 printf("Path Not Formatted Correctly!\n");
             }
             else{
-                printf("run the cd command!\n"); // check
+                // printf("run the cd command!\n"); // check
                 char* path = separatedInput[1];
 
-                printf("path: %s\n",path);
-                changeDirectories("/home/lena/");
-
-                int testy = strcmp(path,"/home/lena/");
-                printf("test: %d",testy);
+                // printf("path: %s\n",path); // check
+                changeDirectories(path);
                 
             }
         }
-
-
-        count++;
-        // put a stop to the for loop when necessary
-        if (count > 4){
-             break;
+        else if(strcmp(firstElement, "exit") == 0){
+            return 0;
         }
+
         
     }
     
@@ -103,8 +95,8 @@ int parseInput(char* input, char splitWords[][500], int maxWords){
         // I was having an issue with trailing new line chars in the last word/toke, so..
         int wordLength = strlen(word);
 
-        if(word[wordLength - 1] == '\n'){
-            word[wordLength - 1] = '\0'; // replace with null char
+        if(word[wordLength - 1] == '\n'){ //if the last char in the word/toke is a newline..
+            word[wordLength - 1] = '\0'; // replace with null char (was messing up things like chdir otherwise)
         }
 
         //printf("Word: %s\n", word); // check - are we parsing correctly?
