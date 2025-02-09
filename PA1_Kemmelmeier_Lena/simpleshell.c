@@ -69,7 +69,13 @@ int main(){
             else{
                 printf("run the cd command!\n"); // check
                 char* path = separatedInput[1];
-                changeDirectories(path);
+
+                printf("path: %s\n",path);
+                changeDirectories("/home/lena/");
+
+                int testy = strcmp(path,"/home/lena/");
+                printf("test: %d",testy);
+                
             }
         }
 
@@ -93,6 +99,14 @@ int parseInput(char* input, char splitWords[][500], int maxWords){
 
     // check - does strtok work?
     while(word != NULL && wordCount < maxWords){
+
+        // I was having an issue with trailing new line chars in the last word/toke, so..
+        int wordLength = strlen(word);
+
+        if(word[wordLength - 1] == '\n'){
+            word[wordLength - 1] = '\0'; // replace with null char
+        }
+
         //printf("Word: %s\n", word); // check - are we parsing correctly?
         strcpy(splitWords[wordCount], word);
         wordCount++;
