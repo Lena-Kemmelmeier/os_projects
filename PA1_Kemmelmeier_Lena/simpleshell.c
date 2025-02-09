@@ -24,7 +24,7 @@ int main(){
     //for(;;){ // start of for loop, loop until the user chooses too - this is the example of an infinite loop from the class materials
 
         // initialize variables
-        int maxStringLength = 100; // arbitrary limit on the string
+        int maxStringLength = 500; // arbitrary limit on the string
         char cwd[maxStringLength]; // statically allocated
         char cli[maxStringLength]; // this is the input from user in CLI, statically allocated
         char *netID = "lkemmelmeier"; // my NetID, for the prompt
@@ -43,7 +43,7 @@ int main(){
         // here, 500 is the max number of strings/words (see function prototype we were given in the class materials)
         validElements = parseInput(cli,separatedInput, maxStringLength); 
 
-        printf("num valid elements: %d/n",validElements);
+        printf("num valid elements: %d\n",validElements);
         
     //}
     
@@ -52,17 +52,16 @@ int main(){
 
 // function definitions
 int parseInput(char* input, char splitWords[][500], int maxWords){
-    char* word = NULL; // assumed delimeter is space here
+    char* word = strtok(input, " ");; // assumed delimeter is space here
     int wordCount = 0;
 
     // check - does strtok work?
-    do{
-        word = strtok(input," ");
-        printf("Word: %s/n", word); 
+    while(word != NULL && wordCount < maxWords){
+        printf("Word: %s\n", word);
+        word = strtok(NULL, " ");
+        //strcpy(splitWords[wordCount], word);
         wordCount++;
-        
-
-    } while (word != NULL);
+    }
 
     return wordCount;
 
