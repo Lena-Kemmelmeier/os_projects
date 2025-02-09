@@ -21,14 +21,17 @@ void changeDirectories(const char* path);
 // main function
 int main(){
 
-    //for(;;){ // start of for loop, loop until the user chooses too - this is the example of an infinite loop from the class materials
+    // initialize variables
+    int maxStringLength = 500; // arbitrary limit on the string
+    int maxNumWords = 500; // arbitrary limit
+    char cwd[maxStringLength]; // statically allocated
+    char cli[maxStringLength]; // this is the input from user in CLI, statically allocated
+    char *netID = "lkemmelmeier"; // my NetID, for the prompt
 
-        // initialize variables
-        int maxStringLength = 500; // arbitrary limit on the string
-        int maxNumWords = 500; // arbitrary limit
-        char cwd[maxStringLength]; // statically allocated
-        char cli[maxStringLength]; // this is the input from user in CLI, statically allocated
-        char *netID = "lkemmelmeier"; // my NetID, for the prompt
+    int count = 0;
+
+    for(;;){ // start of for loop, loop until the user chooses too - this is the example of an infinite loop from the class materials
+
         getcwd(cwd, maxStringLength); // gets the current working directory, this is stored in cwd
 
         // display the prompt to the user
@@ -40,23 +43,48 @@ int main(){
 
         // parse the input to the user
         char separatedInput[maxNumWords][maxStringLength]; // allocate 2d static arr that will store the parsed strings
-        int validElements; // the valid number of cli elements
-        // here, 500 is the max number of strings/words (see function prototype we were given in the class materials)
-        validElements = parseInput(cli,separatedInput, maxStringLength); 
-        //printf("num valid elements: %d\n",validElements); // check - correct number of valid elements
+        int numValidElements; // the valid number of cli elements
+        numValidElements = parseInput(cli,separatedInput, maxStringLength); 
+        // printf("num valid elements: %d\n",numValidElements); // check - correct number of valid elements
 
         // check - what do the contents of the 2d array look like?
-        for (int i = 0; i < validElements; i++){
-            char* currentString = separatedInput[i];
-            printf("current string: %s\n",currentString);
+        // for (int i = 0; i < numValidElements; i++){
+        //     char* currentString = separatedInput[i];
+        //     printf("current string: %s\n",currentString);
+        // }
+
+        // check the first element of the string array (first word)
+        char* firstElement = separatedInput[0];
+        // printf("first elements: %s\n",firstElement);
+    
+        // check if we should run the change dir function
+        if((strcmp(firstElement,"cd") == 0) || strcmp(firstElement,"cd\n") == 0){
+            printf("run the cd command!\n"); // check
+
+            // printf("num valid elements: %d\n",numValidElements); // check - correct number of valid elements
+
+
+            // make sure that this command has two and only two inputs (i.e. cd and something else)
+            if(numValidElements != 2){
+                printf("Path Not Formatted Correctly!\n");
+            }
+        }
+
+
+        count++;
+
+        // put a stop to the for loop when necessary
+        if (count > 4){
+             break;
         }
         
-    //}
+    }
     
     return 0;
 }
 
 // function definitions
+
 int parseInput(char* input, char splitWords[][500], int maxWords){
     char* word = strtok(input, " ");; // assumed delimeter is space here
     int wordCount = 0;
@@ -71,5 +99,9 @@ int parseInput(char* input, char splitWords[][500], int maxWords){
     }
 
     return wordCount;
+
+}
+
+void changeDirectories(const char* path){
 
 }
