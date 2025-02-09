@@ -80,7 +80,7 @@ int main(){
             char* infile = NULL;
             char* outfile = NULL;
             int commandCtr = 0;
-            char* commandArr[maxNumWords];
+            char** commandArr = (char**)malloc((numValidElements + 1) * sizeof(char*));;
             _Bool justFoundRedirChar = 0;
 
             // loop over, check for redirection characters
@@ -90,16 +90,18 @@ int main(){
                 if(strcmp(currentWord, ">") == 0){ // check for output redirection char
                     //printf("Output redirection character found at %d\n",i); // check
                     outfile = separatedInput[i + 1]; // the char after > is the outfile
-                    // printf("Outfile: %s\n",outfile); // check
+                    printf("Outfile: %s\n",outfile); // check
                     justFoundRedirChar = 1;
                 }
                 else if(strcmp(currentWord, "<") == 0){ // check for input redirection char
                     infile = separatedInput[i + 1];
-                    // printf("Infile: %s\n",infile); // check
+                    printf("Infile: %s\n",infile); // check
                     justFoundRedirChar = 1;
                 }
-                else if(justFoundRedirChar == 0){ // make sure this char is not an infile/outfile
-                    commandArr[commandCtr] = separatedInput[i];
+                else if(justFoundRedirChar == 0){ // make sure this char is not an infile/outfile string
+                    commandArr[i] = (char*)malloc(strlen(separatedInput[i]) + 1); // the +1 allows us to get the /0
+                    strcpy(commandArr[i], separatedInput[i]);
+
                     commandCtr++;
                     justFoundRedirChar = 0;
                 }
@@ -111,13 +113,20 @@ int main(){
             
             // print the command array - check
             for(int i = 0; i < commandCtr + 1; i++){
-                printf("Current command: %s\n",commandArr[i]);
+                 printf("Current command: %s\n",commandArr[i]);
             }
 
+            executeCommand(commandArr, infile, outfile);
+
+
+            // deallocate commandArr
+            for (int i = 0; i < commandCtr + 1; i++) {
+                free(commandArr[i]);
+            }
+            free(commandArr);
 
         }
 
-        
     }
     
     return 0;
