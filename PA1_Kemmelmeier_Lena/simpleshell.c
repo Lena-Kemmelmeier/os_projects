@@ -182,11 +182,36 @@ int executeCommand(char* const* enteredCommand, const char* infile, const char* 
 
         // allowed to assume only one output/input redirection at a time
         if(outfile != NULL){ // output redirection
+            int fileDescriptor = open(outfile, O_WRONLY|O_CREAT|O_TRUNC, 0666);
+            dup2(fileDescriptor, STDOUT_FILENO); //STDOUT_FILENO is 1
+
+            if(fileDescriptor == -1){
+                fprintf(stderr, "Error opening input file: %s\n", strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+            else{
+                dup2(fileDescriptor, STDIN_FILENO); //STDIN_FILENO is 0
+                close(fileDescriptor);
+            }
 
         }
         else if(infile != NULL){ // input redirection
+            int fileDescriptor = open(infile, O_RDONLY, 0666);
 
+            if(fileDescriptor == -1){
+                fprintf(stderr, "Error opening input file: %s\n", strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+            else{
+                dup2(fileDescriptor, STDIN_FILENO); //STDIN_FILENO is 0
+                close(fileDescriptor);
+            }
         }
+        if(execvp(enteredCommand[0], enteredCommand) == -1) {
+            fprintf(stderr, "exec Failed: %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+    }
     else{ // we are in parent process - wait for child to finish
         int waitResult;
         wait(&waitResult);
@@ -198,6 +223,6 @@ int executeCommand(char* const* enteredCommand, const char* infile, const char* 
 
     }
 
-    }
+    
     return result;
 }
