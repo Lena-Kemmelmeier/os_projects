@@ -172,6 +172,7 @@ int executeCommand(char* const* enteredCommand, const char* infile, const char* 
 
     // fork - create a child process from parent process
     pid_t pid = fork();
+    //printf("Made it to the fork!\n"); // check
 
     if(pid == -1){ // fork failed
         printf("fork Failed: %s\n", strerror(errno));
@@ -211,10 +212,14 @@ int executeCommand(char* const* enteredCommand, const char* infile, const char* 
             fprintf(stderr, "exec Failed: %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
+        else{
+            result = 0;
+        }
     }
     else{ // we are in parent process - wait for child to finish
         int waitResult;
         wait(&waitResult);
+        //waitpid(pid, &waitResult, 0);
 
         if (WIFEXITED(waitResult)) {
             printf("Child finished with error status: %d\n", WEXITSTATUS(waitResult));
@@ -222,7 +227,6 @@ int executeCommand(char* const* enteredCommand, const char* infile, const char* 
         }
 
     }
-
     
     return result;
 }
