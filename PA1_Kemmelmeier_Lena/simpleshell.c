@@ -14,14 +14,36 @@
 #include <sys/stat.h>
 
 // function prototypes
+void prompt();
 int parseInput(char* input, char splitWords[][500], int maxWords);
 int executeCommand(char* const* enteredCommand, const char* infile, const char* outfile);
 void changeDirectories(const char* path);
 
 // main function
+
 int main(){
 
+    for(;;){ // start of for loop, loop until the user chooses too - this is the example of an infinite loop from the class PPT
+
+        // initialize variables
+        int maxStringLength = 100; // arbitrary limit
+        char cwd[maxStringLength]; // statically allocated
+        char *netID = "lkemmelmeier"; // my NetID, for the prompt
+        getcwd(cwd, maxStringLength); 
+
+        // display the prompt to the user
+        printf("%s:%s$", netID, cwd);
+
+        // get input from the user
 
 
+        // parse the input to the user
+        
+        
+    }
+    
     return 0;
 }
+
+// function definitions
+void prompt();
