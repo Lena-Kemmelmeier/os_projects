@@ -27,13 +27,13 @@ int main(){
     char cwd[maxStringLength]; // statically allocated
     char cli[maxStringLength]; // this is the input from user in CLI, statically allocated
     char *netID = "lkemmelmeier"; // my NetID, for the prompt
+    int numValidElements; // the valid number of cli elements
 
     for(;;){ // start of for loop, loop until the user chooses too - this is the example of an infinite loop from the class materials
 
         getcwd(cwd, maxStringLength); // gets the current working directory, this is stored in cwd
+        printf("%s:%s$", netID, cwd); // display the prompt to the user
 
-        // display the prompt to the user
-        printf("%s:%s$", netID, cwd);
 
         // get input from the user
         fgets(cli, maxStringLength, stdin); // fgets allows us to take an input that has spaces in it
@@ -41,7 +41,6 @@ int main(){
 
         // parse the input to the user
         char separatedInput[maxNumWords][maxStringLength]; // allocate 2d static arr that will store the parsed strings
-        int numValidElements; // the valid number of cli elements
         numValidElements = parseInput(cli,separatedInput, maxStringLength); 
         // printf("num valid elements: %d\n",numValidElements); // check - correct number of valid elements
 
@@ -75,6 +74,18 @@ int main(){
         }
         else if(strcmp(firstElement, "exit") == 0){
             return 0;
+        }
+        else{ // this is a command/executable that would be executed in a child process
+
+
+            // check for redirection characters
+            for(int i = 0; i < numValidElements; i++){
+
+                
+
+            }    
+
+
         }
 
         
@@ -116,4 +127,9 @@ void changeDirectories(const char* path){
     if(chDirResult == -1){
         printf("chdir Failed: %s\n", strerror(errno));
     }
+}
+
+int executeCommand(char* const* enteredCommand, const char* infile, const char* outfile){
+
+    return 0;
 }
