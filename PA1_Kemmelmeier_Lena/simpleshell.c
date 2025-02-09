@@ -90,15 +90,15 @@ int main(){
                 if(strcmp(currentWord, ">") == 0){ // check for output redirection char
                     //printf("Output redirection character found at %d\n",i); // check
                     outfile = separatedInput[i + 1]; // the char after > is the outfile
-                    printf("Outfile: %s\n",outfile); // check
+                    //printf("Outfile: %s\n",outfile); // check
                     justFoundRedirChar = 1;
                 }
                 else if(strcmp(currentWord, "<") == 0){ // check for input redirection char
                     infile = separatedInput[i + 1];
-                    printf("Infile: %s\n",infile); // check
+                    //printf("Infile: %s\n",infile); // check
                     justFoundRedirChar = 1;
                 }
-                else if(justFoundRedirChar == 0){ // make sure this char is not an infile/outfile string
+                else if(justFoundRedirChar == 0){ // make sure this word is not an infile/outfile string
                     commandArr[i] = (char*)malloc(strlen(separatedInput[i]) + 1); // the +1 allows us to get the /0
                     strcpy(commandArr[i], separatedInput[i]);
 
@@ -112,18 +112,17 @@ int main(){
             commandArr[commandCtr] = NULL;
             
             // print the command array - check
-            for(int i = 0; i < commandCtr + 1; i++){
-                 printf("Current command: %s\n",commandArr[i]);
-            }
+            //for(int i = 0; i < commandCtr + 1; i++){
+            //     printf("Current command: %s\n",commandArr[i]);
+            //}
 
             executeCommand(commandArr, infile, outfile);
 
-
             // deallocate commandArr
             for (int i = 0; i < commandCtr + 1; i++) {
-                free(commandArr[i]);
+                free(commandArr[i]); // free each string
             }
-            free(commandArr);
+            free(commandArr); // now free the arr of pointers
 
         }
 
@@ -168,6 +167,21 @@ void changeDirectories(const char* path){
 }
 
 int executeCommand(char* const* enteredCommand, const char* infile, const char* outfile){
+    int result = -1; // result = -1 indicates a failure, result = 0 will be a success
 
-    return 0;
+    // fork - create a child process from parent process
+    pid_t childPID = fork();
+
+    if(childPID == -1){ // fork failed
+        return result;
+    }
+
+    if(childPID == 0){ // fork was successful, we are child process
+
+    }
+    else{ // we are in parent process
+
+    }
+
+    return result;
 }
