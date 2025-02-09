@@ -168,20 +168,36 @@ void changeDirectories(const char* path){
 
 int executeCommand(char* const* enteredCommand, const char* infile, const char* outfile){
     int result = -1; // result = -1 indicates a failure, result = 0 will be a success
+    // I used the three easy principles textbook (ostep) examples from chapter 5 as a guide 
 
     // fork - create a child process from parent process
-    pid_t childPID = fork();
+    pid_t pid = fork();
 
-    if(childPID == -1){ // fork failed
+    if(pid == -1){ // fork failed
+        printf("fork Failed: %s\n", strerror(errno));
         return result;
     }
 
-    if(childPID == 0){ // fork was successful, we are child process
+    if(pid == 0){ // fork was successful, we are in child process
+
+        // allowed to assume only one output/input redirection at a time
+        if(outfile != NULL){ // output redirection
+
+        }
+        else if(infile != NULL){ // input redirection
+
+        }
+    else{ // we are in parent process - wait for child to finish
+        int waitResult;
+        wait(&waitResult);
+
+        if (WIFEXITED(waitResult)) {
+            printf("Child finished with error status: %d\n", WEXITSTATUS(waitResult));
+            return result;
+        }
 
     }
-    else{ // we are in parent process
 
     }
-
     return result;
 }
