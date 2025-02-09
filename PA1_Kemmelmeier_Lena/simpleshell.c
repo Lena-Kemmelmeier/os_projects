@@ -14,7 +14,6 @@
 #include <sys/stat.h>
 
 // function prototypes
-void prompt();
 int parseInput(char* input, char splitWords[][500], int maxWords);
 int executeCommand(char* const* enteredCommand, const char* infile, const char* outfile);
 void changeDirectories(const char* path);
@@ -23,7 +22,7 @@ void changeDirectories(const char* path);
 
 int main(){
 
-    for(;;){ // start of for loop, loop until the user chooses too - this is the example of an infinite loop from the class PPT
+    //for(;;){ // start of for loop, loop until the user chooses too - this is the example of an infinite loop from the class materials
 
         // initialize variables
         int maxStringLength = 100; // arbitrary limit
@@ -35,15 +34,16 @@ int main(){
         printf("%s:%s$", netID, cwd);
 
         // get input from the user
-
+        char input[maxStringLength];
+        fgets(input, maxStringLength, stdin);
+        //printf("%s",input); // check - are we getting the input correctly?
 
         // parse the input to the user
         
         
-    }
+    //}
     
     return 0;
 }
 
 // function definitions
-void prompt();
