@@ -1,0 +1,10 @@
+total 56
+drwxr-xr-x  4 lena lena  4096 Feb  9 22:10 .
+drwxr-xr-x 20 lena lena  4096 Feb  8 22:11 ..
+-rw-rw-r--  1 lena lena   155 Feb  8 21:47 makefile
+-rw-rw-r--  1 lena lena     0 Feb  9 22:10 output.txt
+-rwxrwxr-x  1 lena lena 17816 Feb  9 22:09 simpleshell
+-rw-rw-r--  1 lena lena  7902 Feb  9 22:07 simpleshell.c
+-rw-rw-r--  1 lena lena  6544 Feb  9 22:09 simpleshell.o
+drwxrwxr-x  2 lena lena  4096 Feb  8 22:14 test
+drwxrwxr-x  2 lena lena  4096 Feb  8 22:04 .vscode
