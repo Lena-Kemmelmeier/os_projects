@@ -7,11 +7,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/wait.h>
-//#include <sys/types.h>
+#include <sys/types.h> // I understand that this is not stricly necessary here, but included it since I use pid_t (seemed like good practice)
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-//#include <sys/stat.h>
+#include <sys/stat.h> // I don't think this is super necessary for this assignment, but included it for mkdir just in case
 
 // function prototypes
 int parseInput(char* input, char splitWords[][500], int maxWords);
@@ -27,21 +27,23 @@ int main(){
     char cwd[maxStringLength]; // statically allocated
     char cli[maxStringLength]; // this is the input from user in CLI, statically allocated
     char *netID = "lkemmelmeier"; // my NetID, for the prompt
-    int numValidElements; // the valid number of cli elements
 
     for(;;){ // start of for loop, loop until the user chooses too - this is the example of an infinite loop from the class materials
 
         getcwd(cwd, maxStringLength); // gets the current working directory, this is stored in cwd
         printf("%s:%s$ ", netID, cwd); // display the prompt to the user
 
-
         // get input from the user
         fgets(cli, maxStringLength, stdin); // fgets allows us to take an input that has spaces in it
         //printf("%s",input); // check - are we getting the input correctly?
 
+        // did not see anywhere in the instructions that these cli/cwd arrays had to be dynamically allocated
+        // and since the separatedInput is fine to be statically allocated, I just kept it consistent
+
         // parse the input to the user
+        // according to homework directions, having a 2d static array is fine here
         char separatedInput[maxNumWords][maxStringLength]; // allocate 2d static arr that will store the parsed strings
-        numValidElements = parseInput(cli,separatedInput, maxStringLength); 
+        int numValidElements = parseInput(cli,separatedInput, maxStringLength); //valid number of cli elements
         // printf("num valid elements: %d\n",numValidElements); // check - correct number of valid elements
 
         // check - what do the contents of the 2d array look like?
@@ -61,7 +63,7 @@ int main(){
 
             // make sure that this command has two and only two inputs (i.e. cd and something else)
             if(numValidElements != 2){
-                printf("Path Not Formatted Correctly!\n");
+                printf("Path Not Formatted Correctly!\n"); // I put the handling of this edge case in the main; the instructions did not make it seem like it needed to be in the changeDirectories function
             }
             else{
                 // printf("run the cd command!\n"); // check
@@ -132,7 +134,6 @@ int main(){
 }
 
 // function definitions
-
 int parseInput(char* input, char splitWords[][500], int maxWords){
     char* word = strtok(input, " ");; // assumed delimeter is space here
     int wordCount = 0;
@@ -168,7 +169,7 @@ void changeDirectories(const char* path){
 
 int executeCommand(char* const* enteredCommand, const char* infile, const char* outfile){
     int result = -1; // result = -1 indicates a failure, result = 0 will be a success
-    // I used the three easy principles textbook (ostep) examples from chapter 5 as a guide 
+    // I used the three easy principles textbook (ostep) examples from chapter 5 as a guide for control flow here
 
     // fork - create a child process from parent process
     pid_t pid = fork();
