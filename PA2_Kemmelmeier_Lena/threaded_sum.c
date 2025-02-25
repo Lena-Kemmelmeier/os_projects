@@ -32,11 +32,10 @@ int main(int argc, char* argv[]){
     
     if (argc != 3){
         printf("Not enough parameters!\n");
-        printf("%d\n",argc);
+        //printf("%d\n",argc);
+        return -1;
     }
-    else{
 
-    }
 
     return 0;
 }
@@ -52,14 +51,13 @@ int readFile(char fileName[], int intArr[]){
         printf("File not found...\n");
         return -1;
     }
-    else{ // the file exists, read in the numbers
-
-
-        // as long as we are reading in at least one int, store into array, increment count
-        while(fscanf(file, "%d", &intArr[numItemsParsed]) > 0){
-            numItemsParsed++;
-        }
-
-        return numItemsParsed;
+    
+    // the file exists, so read in the numbers
+    // as long as we are reading in at least one int, store into array, increment count
+    while(fscanf(file, "%d", &intArr[numItemsParsed]) > 0){
+        numItemsParsed++;
     }
+
+    fclose(fileName);
+    return numItemsParsed;
 }
