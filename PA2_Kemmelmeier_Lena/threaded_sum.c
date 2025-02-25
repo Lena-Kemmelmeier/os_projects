@@ -30,6 +30,7 @@ typedef struct _thread_data_t {
 // main function
 int main(int argc, char* argv[]){
     
+    // check number of arguments, message if too few
     if (argc != 3){
         printf("Not enough parameters!\n");
         //printf("%d\n",argc);
@@ -39,9 +40,20 @@ int main(int argc, char* argv[]){
     // read in all data from the file that corresponds to the command-line-provided filename
     int maxAmountNums = 1000000; // max number of numbers is 1 million
     int numbersArray[maxAmountNums];
-    int numValuesRead = readFile(argv[1], numbersArray);
+    int numValuesRead = readFile(argv[1], numbersArray); //argv[1] is the second argument aka fileNmae
 
     printf("%d\n",numValuesRead);
+
+    // make sure number of threads requested is less than amount of values read
+    if(argv[2] > numValuesRead){ // argv[2] is the number of threads requested (third argument)
+        return -1;
+    }
+
+
+    // check - is the array actually storing the ints from the file?
+    // for (int i = 0; i < numValuesRead; i++){
+    //     printf("%d\n",numbersArray[i]);
+    // }
 
     return 0;
 }
