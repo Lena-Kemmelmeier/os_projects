@@ -36,6 +36,12 @@ int main(int argc, char* argv[]){
         return -1;
     }
 
+    // read in all data from the file that corresponds to the command-line-provided filename
+    int maxAmountNums = 1000000; // max number of numbers is 1 million
+    int numbersArray[maxAmountNums];
+    int numValuesRead = readFile(argv[1], numbersArray);
+
+    printf("%d\n",numValuesRead);
 
     return 0;
 }
@@ -58,6 +64,6 @@ int readFile(char fileName[], int intArr[]){
         numItemsParsed++;
     }
 
-    fclose(fileName);
+    fclose(file);
     return numItemsParsed;
 }
