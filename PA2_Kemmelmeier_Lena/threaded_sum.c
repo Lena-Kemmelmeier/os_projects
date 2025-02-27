@@ -17,6 +17,7 @@
 
 // function prototypes
 int readFile(char fileName[], int intArr[]);
+void* arraySum(void*);
 
 // struct declaration
 typedef struct _thread_data_t {
@@ -46,7 +47,8 @@ int main(int argc, char* argv[]){
 
     // make sure number of threads requested is less than amount of values read
     // atoi converts argv[2] from a string to an int
-    if(atoi(argv[2]) > numValuesRead){ // argv[2] is the number of threads requested (third argument)
+    int numThreads = atoi(argv[2]); // argv[2] is the number of threads requested (third argument)
+    if(numThreads > numValuesRead){ 
         return -1;
     }
 
@@ -59,8 +61,33 @@ int main(int argc, char* argv[]){
     struct timeval initialTime;
     gettimeofday(&initialTime, NULL); // according to the die.net page, timezone argument should normally be NULL
 
+    // initializing lock/mutex
     pthread_mutex_t lock; // created threads will use this for locking
     pthread_mutex_init(&lock, NULL); // NULL used in self-initializing routine example on die.net
+
+    thread_data_t threadDataArr[numThreads];
+    for (int i = 0; i < numThreads; i++){
+        threadDataArr[i].data = numbersArray;
+        threadDataArr[i].totalSum = &totalSum;
+        threadDataArr[i].lock = &lock;
+        
+        // evening splitting of what this thread should sum through
+        threadDataArr[i].startInd = (i * numValuesRead) / numThreads; // 0 times anything is 0
+        threadDataArr[i].endInd = ((i + 1) * numValuesRead) / numThreads;
+    }
+
+    // create all the threads
+    pthread_t threads[numThreads];
+    for(int i = 0; i < numThreads; i++){
+        pthread_create(&threads[i], NULL, arraySum, &threadDataArr[i]);
+    }
+
+    // join the threads
+    for(int i = 0; i < numThreads; i++){
+
+    }
+
+
 
     return 0;
 }
@@ -85,4 +112,8 @@ int readFile(char fileName[], int intArr[]){
 
     fclose(file);
     return numItemsParsed;
+}
+
+void* arraySum(void*){
+    
 }
