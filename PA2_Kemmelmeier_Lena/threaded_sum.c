@@ -45,15 +45,20 @@ int main(int argc, char* argv[]){
     printf("%d\n",numValuesRead);
 
     // make sure number of threads requested is less than amount of values read
-    if(argv[2] > numValuesRead){ // argv[2] is the number of threads requested (third argument)
+    // atoi converts argv[2] from a string to an int
+    if(atoi(argv[2]) > numValuesRead){ // argv[2] is the number of threads requested (third argument)
         return -1;
     }
-
 
     // check - is the array actually storing the ints from the file?
     // for (int i = 0; i < numValuesRead; i++){
     //     printf("%d\n",numbersArray[i]);
     // }
+
+    long long int totalSum = 0; // keeps track of the sum, as specified in the directions
+    struct timeval initialTime;
+    gettimeofday(&initialTime, NULL); // according to the die.net page, timezone argument should normally be NULL
+
 
     return 0;
 }
