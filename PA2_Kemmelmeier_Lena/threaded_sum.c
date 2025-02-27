@@ -16,7 +16,8 @@
 #include <sys/time.h>
 
 // function prototypes
-int readFile(char fileName[], int intArr[]);
+int readFile(char fileName[], int intArr[]); // I am dynamically allocating memory due to a past seg fault issue
+//int readFile(char* fileName, int** intArr); // I am dynamically allocating memory due to a past seg fault issue
 void* arraySum(void* threadInputData);
 
 // struct declaration
@@ -30,6 +31,8 @@ typedef struct _thread_data_t {
 
 // main function
 int main(int argc, char* argv[]){
+
+    // used dynamic memory allocation as we are expected to handle up to 100000000 numbers at once
     
     // check number of arguments, message if too few
     if (argc != 3){
@@ -39,16 +42,21 @@ int main(int argc, char* argv[]){
     }
 
     // read in all data from the file that corresponds to the command-line-provided filename
-    int maxAmountNums = 1000000; // max number of numbers is 1 million
+    //int maxAmountNums = 100000000; // max number of numbers - as specified in assignment note
+    int maxAmountNums = 1000000; // max number of numbers - as specified in assignment note
     int numbersArray[maxAmountNums];
+    //int* numbersArray;
+    //int numValuesRead = readFile(argv[1], &numbersArray); //argv[1] is the second argument aka fileNmae
     int numValuesRead = readFile(argv[1], numbersArray); //argv[1] is the second argument aka fileNmae
 
-    printf("%d\n",numValuesRead);
+
+    // printf("%d\n",numValuesRead);
 
     // make sure number of threads requested is less than amount of values read
     // atoi converts argv[2] from a string to an int
     int numThreads = atoi(argv[2]); // argv[2] is the number of threads requested (third argument)
     if(numThreads > numValuesRead){ 
+        printf("Too many threads requested!\n");
         return -1;
     }
 
@@ -68,7 +76,9 @@ int main(int argc, char* argv[]){
     pthread_mutex_t lock; // created threads will use this for locking
     pthread_mutex_init(&lock, NULL); // NULL used in self-initializing routine example on die.net
 
+    // thread_data_t* threadDataArr = malloc(numThreads * sizeof(thread_data_t));
     thread_data_t threadDataArr[numThreads];
+
     for (int i = 0; i < numThreads; i++){
         threadDataArr[i].data = numbersArray;
         threadDataArr[i].totalSum = &totalSum;
@@ -80,6 +90,7 @@ int main(int argc, char* argv[]){
     }
 
     // create all the threads
+    //pthread_t* threads = malloc(numThreads * sizeof(pthread_t));
     pthread_t threads[numThreads];
     for(int i = 0; i < numThreads; i++){
         pthread_create(&threads[i], NULL, arraySum, &threadDataArr[i]);
@@ -101,6 +112,9 @@ int main(int argc, char* argv[]){
     printf("Final sum: %lld\n", totalSum);
 
     pthread_mutex_destroy(&lock); // destroy the lock
+    // free(numbersArray);
+    // free(threads);
+    // free(threadDataArr);
     return 0;
 }
 
