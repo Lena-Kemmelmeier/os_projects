@@ -17,7 +17,7 @@
 
 // function prototypes
 int readFile(char fileName[], int intArr[]);
-void* arraySum(void*);
+void* arraySum(void* threadInputData);
 
 // struct declaration
 typedef struct _thread_data_t {
@@ -58,7 +58,10 @@ int main(int argc, char* argv[]){
     // }
 
     long long int totalSum = 0; // keeps track of the sum, as specified in the directions
-    struct timeval initialTime;
+
+    // get the start time
+    struct timeval initialTime, endTime; // chose to initialize both at once according to the StackOverflow example
+    double elapsedTime; // this implementation is from the StackOverflow resource posted in the homework
     gettimeofday(&initialTime, NULL); // according to the die.net page, timezone argument should normally be NULL
 
     // initializing lock/mutex
@@ -84,11 +87,20 @@ int main(int argc, char* argv[]){
 
     // join the threads
     for(int i = 0; i < numThreads; i++){
-
+        pthread_join(threads[i], NULL); // wait for created threads to finish
     }
 
+    // get the end time (this stops the timer)
+    gettimeofday(&endTime, NULL); // according to the die.net page, timezone argument should normally be NULL
 
+    // calculate the total execution time
+    // this implementation is from the StackOverflow resource posted in the homework
+    elapsedTime = (endTime.tv_sec - initialTime.tv_sec) * 1000.0;      // sec to ms
+    elapsedTime += (endTime.tv_usec - initialTime.tv_usec) / 1000.0;   // us to ms
+    printf("Total execution time: %f ms.\n", elapsedTime);
+    printf("Final sum: %lld\n", totalSum);
 
+    pthread_mutex_destroy(&lock); // destroy the lock
     return 0;
 }
 
@@ -114,6 +126,7 @@ int readFile(char fileName[], int intArr[]){
     return numItemsParsed;
 }
 
-void* arraySum(void*){
+void* arraySum(void* threadInputData){
     
+    return NULL;
 }
