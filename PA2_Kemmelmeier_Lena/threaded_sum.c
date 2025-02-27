@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/stat.h> // I don't think this is super necessary for this assignment, but included it for mkdir just in case
-#include <pthread.h> // for pthreds
+#include <pthread.h> // for pthreads
 #include <sys/time.h>
 
 // function prototypes
@@ -127,6 +127,19 @@ int readFile(char fileName[], int intArr[]){
 }
 
 void* arraySum(void* threadInputData){
-    
+    thread_data_t *threadData = (thread_data_t*)threadInputData;
+    long long int threadSum = 0;
+
+    // let each thread sum
+    for(int i = threadData->startInd; i < threadData->endInd; i++){
+        threadSum = threadSum + threadData->data[i];
+    }
+
+    // make it so only one thread at a time can update totalSum (shared between threads
+    // avoid race conditions
+    pthread_mutex_lock(threadData->lock);
+    *(threadData->totalSum) = *(threadData->totalSum) + threadSum;
+    pthread_mutex_unlock(threadData->lock);
+
     return NULL;
 }
