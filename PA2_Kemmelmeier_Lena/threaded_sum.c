@@ -59,6 +59,8 @@ int main(int argc, char* argv[]){
     struct timeval initialTime;
     gettimeofday(&initialTime, NULL); // according to the die.net page, timezone argument should normally be NULL
 
+    pthread_mutex_t lock; // created threads will use this for locking
+    pthread_mutex_init(&lock, NULL); // NULL used in self-initializing routine example on die.net
 
     return 0;
 }
