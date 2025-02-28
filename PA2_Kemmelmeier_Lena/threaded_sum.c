@@ -16,10 +16,9 @@
 #include <sys/time.h>
 
 #define MAX_SIZE 100000000
-//#define MAX_SIZE 1000000
 
 // function prototypes
-int readFile(char fileName[], int intArr[]); // I am dynamically allocating memory due to a past seg fault issue
+int readFile(char fileName[], int intArr[]);
 void* arraySum(void* threadInputData);
 
 // struct declaration
@@ -44,14 +43,8 @@ int main(int argc, char* argv[]){
     }
 
     // read in all data from the file that corresponds to the command-line-provided filename
-    //int maxAmountNums = 100000000; // max number of numbers - as specified in assignment note
-    // int maxAmountNums = 1000000; // max number of numbers - as specified in assignment note
     int* numbersArray = malloc(MAX_SIZE*sizeof(int));
-    //int* numbersArray;
-    int numValuesRead = readFile(argv[1], numbersArray); //argv[1] is the second argument aka fileNmae
-    //int numValuesRead = readFile(argv[1], numbersArray); //argv[1] is the second argument aka fileNmae
-
-
+    int numValuesRead = readFile(argv[1], numbersArray); //argv[1] is the second argument aka fileName
     // printf("%d\n",numValuesRead);
 
     // make sure number of threads requested is less than amount of values read
@@ -81,8 +74,6 @@ int main(int argc, char* argv[]){
     pthread_mutex_init(&lock, NULL); // NULL used in self-initializing routine example on die.net
 
     thread_data_t* threadDataArr = malloc(numThreads * sizeof(thread_data_t));
-    //thread_data_t threadDataArr[numThreads];
-
     for (int i = 0; i < numThreads; i++){
         threadDataArr[i].data = numbersArray;
         threadDataArr[i].totalSum = &totalSum;
@@ -95,7 +86,6 @@ int main(int argc, char* argv[]){
 
     // create all the threads
     pthread_t* threads = malloc(numThreads * sizeof(pthread_t));
-    //pthread_t threads[numThreads];
     for(int i = 0; i < numThreads; i++){
         pthread_create(&threads[i], NULL, arraySum, &threadDataArr[i]);
     }
@@ -153,10 +143,9 @@ void* arraySum(void* threadInputData){
         threadSum = threadSum + threadData->data[i];
     }
 
-    // make it so only one thread at a time can update totalSum (shared between threads
-    // avoid race conditions
+    // make it so only one thread at a time can update totalSum (shared between threads)
     pthread_mutex_lock(threadData->lock);
-    *(threadData->totalSum) = *(threadData->totalSum) + threadSum;
+    *(threadData->totalSum) = *(threadData->totalSum) + threadSum; // this is the critical space!
     pthread_mutex_unlock(threadData->lock);
 
     return NULL;
