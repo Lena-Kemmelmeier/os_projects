@@ -1,8 +1,8 @@
-sched_c: sched_c.o
-	gcc -Wall -pthread -o sched_c sched_c.o
+sched: sched.o
+	gcc -Wall -pthread -o sched sched.o
 
-sched_c.o: sched_c.c
-	gcc -Wall -pthread  -c sched_c.c
+sched.o: sched.c
+	gcc -Wall -pthread  -c sched.c
 
 clean:
-	rm -f *.o sched_c
+	rm -f *.o sched
