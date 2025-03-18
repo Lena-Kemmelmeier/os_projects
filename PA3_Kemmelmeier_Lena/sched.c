@@ -54,26 +54,15 @@ int main(int argc, char* argv[]){
     int numThreads = atoi(argv[1]); // argv[1] is the number of threads requested (second argument)
     //printf("%d\n",numThreads); // check
 
-
-    
-
-
-    // get the start time
-    struct timeval initialTime, endTime; // chose to initialize both at once according to the StackOverflow example
-    double elapsedTime; // this implementation is from the StackOverflow resource posted in the homework
-    gettimeofday(&initialTime, NULL); // according to the die.net page, timezone argument should normally be NULL
-
-
-
+    // create the thread data array
     thread_data_t* threadDataArr = malloc(numThreads * sizeof(thread_data_t));
     for (int i = 0; i < numThreads; i++){
+        threadDataArr[i].localTid = i;
         threadDataArr[i].data = numbersArray;
-        threadDataArr[i].totalSum = &totalSum;
+        threadDataArr[i].numVals = MAX_SIZE;
         threadDataArr[i].lock = &lock;
-        
-        // evening splitting of what this thread should sum through
-        threadDataArr[i].startInd = (i * numValuesRead) / numThreads; // 0 times anything is 0
-        threadDataArr[i].endInd = ((i + 1) * numValuesRead) / numThreads;
+        threadDataArr[i].totalSum = &totalSum;
+
     }
 
     // create all the threads
@@ -87,14 +76,8 @@ int main(int argc, char* argv[]){
         pthread_join(threads[i], NULL); // wait for created threads to finish
     }
 
-    // get the end time (this stops the timer)
-    gettimeofday(&endTime, NULL); // according to the die.net page, timezone argument should normally be NULL
 
-    // calculate the total execution time
-    // this implementation is from the StackOverflow resource posted in the homework
-    elapsedTime = (endTime.tv_sec - initialTime.tv_sec) * 1000.0;      // sec to ms
-    elapsedTime += (endTime.tv_usec - initialTime.tv_usec) / 1000.0;   // us to ms
-    printf("Total execution time: %f ms.\n", elapsedTime);
+
     printf("Final sum: %lld\n", totalSum);
 
     pthread_mutex_destroy(&lock); // destroy the lock
@@ -104,41 +87,27 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
-// function definitions
-int readFile(char fileName[], int intArr[]){
-    int numItemsParsed = 0; // number of numbers in the file
-
-    // create input file stream and open it for reading
-    FILE* file = fopen(fileName,"r");
-
-    if(file == NULL){ // file does not exist
-        printf("File not found...\n");
-        return -1;
-    }
-    
-    // the file exists, so read in the numbers
-    // as long as we are reading in at least one int, store into array, increment count
-    while(fscanf(file, "%d", &intArr[numItemsParsed]) == 1){
-        numItemsParsed++;
-    }
-
-    fclose(file);
-    return numItemsParsed;
-}
-
 void* arraySum(void* threadInputData){
     thread_data_t *threadData = (thread_data_t*)threadInputData;
     long long int threadSum = 0;
 
-    // let each thread sum
-    for(int i = threadData->startInd; i < threadData->endInd; i++){
-        threadSum = threadSum + threadData->data[i];
-    }
+    while(1){
+        // let each thread sum over the whole length of the array
+        for(int i = 0; i < threadData->numVals - 1; i++){
+            struct timespec start;
+            clock_gettime(NULL, &start);
 
-    // make it so only one thread at a time can update totalSum (shared between threads)
-    pthread_mutex_lock(threadData->lock);
-    *(threadData->totalSum) = *(threadData->totalSum) + threadSum; // this is the critical space!
-    pthread_mutex_unlock(threadData->lock);
+            threadSum = threadSum + threadData->data[i];
+
+            struct timespec end = clock_gettime();
+        }
+
+        // make it so only one thread at a time can update totalSum (shared between threads)
+        pthread_mutex_lock(threadData->lock);
+        *(threadData->totalSum) = *(threadData->totalSum) + threadSum; // this is the critical space!
+        pthread_mutex_unlock(threadData->lock);
+    }
+    
 
     return NULL;
 }

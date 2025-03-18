@@ -1,8 +1,8 @@
-threaded_sum: threaded_sum.o
-	gcc -Wall -pthread -o threaded_sum threaded_sum.o
+sched_c: sched_c.o
+	gcc -Wall -pthread -o sched_c sched_c.o
 
-threaded_sum.o: threaded_sum.c
-	gcc -Wall -pthread  -c threaded_sum.c
+sched_c.o: sched_c.c
+	gcc -Wall -pthread  -c sched_c.c
 
 clean:
-	rm -f *.o threaded_sum
+	rm -f *.o sched_c
