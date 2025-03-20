@@ -3,6 +3,9 @@
 // Date: March 15th 2025
 
 // include libraries
+#define _POSIX_C_SOURCE 200809L // had to use this instead of <sys/syscall.h> on my linux device - is this fine?
+#define _GNU_SOURCE // had to use this instead of <sys/syscall.h> on my linux device - is this fine?
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,8 +18,9 @@
 #include <pthread.h>
 #include <time.h>
 #include <ctype.h> // for the embdedded print_progress function
-#include <sys/syscall.h> // for the embdedded print_progress function
+// #include <sys/syscall.h> // for the embdedded print_progress function
 #include <sys/mman.h> // for the embdedded print_progress function
+#include <linux/unistd.h> // had to use this instead of <sys/syscall.h> on my linux device - is this fine?
 
 #define MAX_SIZE 2000000 // fixed array size
 
