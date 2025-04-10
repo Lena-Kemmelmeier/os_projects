@@ -1,6 +1,6 @@
 // Author: Lena Kemmelmeier
 // Purpose: PA4: Dynamic Memory Allocator
-// Date: April 8th 2025
+// Date: April 10th 2025
 
 // include libraries
 #include <stdio.h>
@@ -55,43 +55,54 @@ mlist_t mlist;
 int main(int argc, char* argv[]){
 
     mlist.head = NULL; // initialize head to NULL
-    printMemList(mlist.head);
+    printMemList(mlist.head); // when we print, we should just see just ===========
 
     void* p1 = mymalloc(10);
-    printMemList(mlist.head);
+    // mymalloc should not find a free block, it will call growHeapBySize(10), which will allocate a chunk of at least 1 KB
+    printMemList(mlist.head); // header 32 bytes
 
     void* p2 = mymalloc(100);
+    // now we should see two allocated blocks (needed to allocate another 1 KB chunk)
     printMemList(mlist.head);
 
     void* p3 = mymalloc(200);
+    // grow the heap again
     printMemList(mlist.head);
     
     void* p4 = mymalloc(500);
+    // . . . and again!
     printMemList(mlist.head);
 
     myfree(p3); p3 = NULL;
+    // this should free p3 - which shows up as block 2 in the printMemList output (starts at block 0)
     printMemList(mlist.head);
 
     myfree(p2); p2 = NULL;
+    // this makes it so two blocks are both adjacent and free
+    // this means the deallocator coalesces the two free blocks, merging them
+    // merged block is of size 2016 = 992 + 992 + 32 (this is the header)
     printMemList(mlist.head);
     
     void* p5 = mymalloc(150);
+    // searches for a block of at least 150 bytes, finds this big free block of 2016 bytes
+    // there's enough space to split, so split block and remaining space available for the future
     printMemList(mlist.head);
 
     void* p6 = mymalloc(500);
+    // need to debug why it isnt using space left over from this last split
     printMemList(mlist.head);
 
     myfree(p4); p4 = NULL;
-    printMemList(mlist.head);
+    // printMemList(mlist.head);
 
     myfree(p5); p5 = NULL;
-    printMemList(mlist.head);
+    // printMemList(mlist.head);
 
     myfree(p6); p6 = NULL;
-    printMemList(mlist.head);
+    // printMemList(mlist.head);
 
     myfree(p1); p1 = NULL;
-    printMemList(mlist.head);
+    // printMemList(mlist.head);
 
     return 0;
 }
