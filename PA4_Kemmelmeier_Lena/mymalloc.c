@@ -57,16 +57,16 @@ int main(int argc, char* argv[]){
     mlist.head = NULL; // initialize head to NULL
     printMemList(mlist.head);
 
-    void * p1 = mymalloc(10);
+    void* p1 = mymalloc(10);
     printMemList(mlist.head);
 
-    void * p2 = mymalloc(100);
+    void* p2 = mymalloc(100);
     printMemList(mlist.head);
 
-    void * p3 = mymalloc(200);
+    void* p3 = mymalloc(200);
     printMemList(mlist.head);
     
-    void * p4 = mymalloc(500);
+    void* p4 = mymalloc(500);
     printMemList(mlist.head);
 
     myfree(p3); p3 = NULL;
@@ -75,10 +75,10 @@ int main(int argc, char* argv[]){
     myfree(p2); p2 = NULL;
     printMemList(mlist.head);
     
-    void * p5 = mymalloc(150);
+    void* p5 = mymalloc(150);
     printMemList(mlist.head);
 
-    void * p6 = mymalloc(500);
+    void* p6 = mymalloc(500);
     printMemList(mlist.head);
 
     myfree(p4); p4 = NULL;
@@ -144,6 +144,8 @@ void myfree(void* ptr){
     block->status = 0;
     coallesceBlockNext(block);
     coallesceBlockPrev(block);
+
+    return; // not necessary, I know
 }
 
 // function definitions - additional functions
@@ -191,39 +193,59 @@ void splitBlockAtSize(mblock_t* block, size_t newSize){
     size_t totalSize = block->size;
 
     if(totalSize < newSize + sizeof(mblock_t) + 1){
-        return; // not enough to split
+        return; // not enough to split!
     } 
 
     // calculate the end of the allocated block
-    char* newBlockAddr = + newSize + (char*)block + MBLOCK_HEADER_SZ;
+    char* newBlockAddr = (char*)block + newSize + MBLOCK_HEADER_SZ; // starting address of the new block that will be created when splitting larger block
+    // we skip over the header and the amount of data we're allocating
+
+
     mblock_t* newBlock = (mblock_t*)newBlockAddr; // reinterpret the address
 
-    // 
-    newBlock->size = totalSize - newSize - MBLOCK_HEADER_SZ;
+    // how much memory do we have left after taking out the portion for the allocated block?
+    newBlock->size = totalSize - newSize - MBLOCK_HEADER_SZ; // original block size - how much we're allocating - header size
     newBlock->status = 0;
+
+    // set the links
     newBlock->prev = block;
     newBlock->next = block->next;
-    newBlock->payload = (char*)newBlock + MBLOCK_HEADER_SZ;
 
-    if(block->next != NULL){
-        block->next->prev = newBlock;
+    newBlock->payload = (char*)newBlock + MBLOCK_HEADER_SZ; // skip over the header
+
+    mblock_t* nextBlock = block->next;
+
+    // if there is a block after
+    if(nextBlock != NULL){
+        nextBlock->prev = newBlock; // set the previous of this next block to point back at this new block
     }
-    block->next = newBlock;
-    block->size = newSize;
+
+    nextBlock = newBlock; // the next block points next to the new block that was just created
+    block->size = newSize; // match the requested allocation size
+
+    return; // not necessary, I know
+
 }
 
 void coallesceBlockPrev(mblock_t* freedBlock){
 
-    mblock_t* prev = freedBlock->prev;
+    mblock_t* prevBlock = freedBlock->prev;
 
-    if(prev != NULL && !prev->status){
-        prev->size += MBLOCK_HEADER_SZ + freedBlock->size;
-        prev->next = freedBlock->next;
+    // if there is a previous block and it is free
+    if(prevBlock != NULL && prevBlock->status == 0){
+        prevBlock->size = prevBlock->size + MBLOCK_HEADER_SZ + freedBlock->size; // add the side of the freed block to this previous block
+        prevBlock->next = freedBlock->next; // the next of the previous block will point to the the next of the freed block
 
-        if (freedBlock->next != NULL){
-            freedBlock->next->prev = prev;
+
+        mblock_t* nextBlock = freedBlock->next;
+
+        // if there's a block after this freed block, make sure that block points back to the previous block
+        if (nextBlock != NULL){
+            nextBlock->prev = prevBlock;
         } 
     }
+
+    return; // not necessary, I know
 }
 
 void coallesceBlockNext(mblock_t* freedBlock){
@@ -235,14 +257,20 @@ void coallesceBlockNext(mblock_t* freedBlock){
 
     mblock_t* nextBlock = freedBlock->next;
 
+    // if there is a next block and it is free
     if(nextBlock != NULL && nextBlock->status == 0){
-        freedBlock->size += MBLOCK_HEADER_SZ + nextBlock->size;
-        freedBlock->next = nextBlock->next;
+        freedBlock->size = freedBlock->size + MBLOCK_HEADER_SZ + nextBlock->size; // adds the size of the next block to this freed block
+        freedBlock->next = nextBlock->next; // skip next block = the next of freed block will point to the block after the next block
 
-        if(nextBlock->next != NULL){
-            nextBlock->next->prev = freedBlock;
+        mblock_t* nextNextBlock = nextBlock->next;
+
+        // if there's a block after the next block, we need to update its previous ptr so that it points back to the freed block now
+        if(nextNextBlock != NULL){
+            nextNextBlock->prev = freedBlock;
         }
     }
+
+    return; // not necessary, I know
 }
 
 mblock_t* growHeapBySize(size_t size){
@@ -260,7 +288,7 @@ mblock_t* growHeapBySize(size_t size){
         return NULL; // could not extend heap
     }
 
-    // initialize a new memory block after grown
+    // initialize a new memory block after growing
     mblock_t* block = (mblock_t*)mem;
     block->prev = NULL;
     block->status = 0;
@@ -276,12 +304,16 @@ mblock_t* growHeapBySize(size_t size){
 
     // if we already have other memory blocks in the memory list, add this to the end of the memory list
     mblock_t* last = findLastMemlistBlock();
+
+    // set the links
     block->prev = last;
     last->next = block;
+
     return block;
 
 }
 
+// supplied from the assignment
 void printMemList(const mblock_t* head){
 
   const mblock_t* p = head;
