@@ -85,24 +85,32 @@ int main(int argc, char* argv[]){
     
     void* p5 = mymalloc(150);
     // searches for a block of at least 150 bytes, finds this big free block of 2016 bytes
-    // there's enough space to split, so split block and remaining space available for the future
+    // there's enough space to split, so split block and remaining space is for a block added to the block list (size 1834)
     printMemList(mlist.head);
 
     void* p6 = mymalloc(500);
-    // need to debug why it isnt using space left over from this last split
+    // searches for a block at least 500 bytes, finds the block that is 1834 bytes
+    // there's enough space to split, so split block and remainign space is fot a block added to the block list (size 1302)
     printMemList(mlist.head);
 
     myfree(p4); p4 = NULL;
-    // printMemList(mlist.head);
+    // free p3 which had been the last block of 992 bytes
+    // this means we have two blocks that are adjacent and free, so they coalesce into a mega block of 2326 bytes
+    printMemList(mlist.head);
 
     myfree(p5); p5 = NULL;
-    // printMemList(mlist.head);
+    // this frees the block that is 150 bytes, no coalescing because it is not adjacent to another free block
+    printMemList(mlist.head);
 
     myfree(p6); p6 = NULL;
-    // printMemList(mlist.head);
+    // now, we free the block that is 500 bytes
+    // this made it so the block that is 2336 bytes, this newly free block, and the 150 bytes block are all coalesced together
+    // results in a mega block that is 3040 bytes big
+    printMemList(mlist.head);
 
     myfree(p1); p1 = NULL;
-    // printMemList(mlist.head);
+    // finally, free the last allocated block (we coalesce with the adjacent free block), results in one big free block that is 4064 bytes
+    printMemList(mlist.head);
 
     return 0;
 }
@@ -231,7 +239,7 @@ void splitBlockAtSize(mblock_t* block, size_t newSize){
         nextBlock->prev = newBlock; // set the previous of this next block to point back at this new block
     }
 
-    nextBlock = newBlock; // the next block points next to the new block that was just created
+    block->next = newBlock; // the next block points next to the new block that was just created
     block->size = newSize; // match the requested allocation size
 
     return; // not necessary, I know
