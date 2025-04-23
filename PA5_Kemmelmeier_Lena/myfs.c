@@ -379,16 +379,15 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
 
   // modifying the inode table
   void* inode_table_ptr = malloc(BLKSIZE); // gives us one block of memory
-  memcpy(inode_table_ptr, &myfs->groupdescriptor.groupdescriptor_info.inode_table, BLKSIZE);  // read one block from 'disk' into memory
+  memcpy(inode_table_ptr, myfs->groupdescriptor.groupdescriptor_info.inode_table, BLKSIZE);  // read one block from 'disk' into memory
 
   inode_t* inode_table = (inode_t*)inode_table_ptr;
 
   // edit the parent dir inode - we're adding one direcrtoy
   inode_t* parent_inode = &inode_table[cur_dir_inode_number];
-  parent_inode->size = parent_inode->size + sizeof(dirent_t);
 
   // initialize new dir inode - this time we have two new entries to add
-  inode_t* next_inode = &inode_table[cur_dir_inode_number];
+  inode_t* next_inode = &inode_table[next_inode_num];
   next_inode->size = sizeof(dirent_t) * 2;
   next_inode->blocks = 1;
 
@@ -401,59 +400,60 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
   block_t* block_array = myfs->groupdescriptor.groupdescriptor_info.block_data;
   next_inode->data[0] = &block_array[next_block]; // assigning first dala block for this inode
 
-  // write out to disk
-  memcpy(myfs->groupdescriptor.groupdescriptor_info.inode_table, inode_table_ptr, BLKSIZE);
+  // write out to disk - waited till end because I was missing some changes
+  // memcpy(myfs->groupdescriptor.groupdescriptor_info.inode_table, inode_table_ptr, BLKSIZE);
 
 
 
 
   // updating parent's dir data
   void* parent_data_ptr = malloc(BLKSIZE); // give us one block
-  inode_t* parent_inode = &inode_table[cur_dir_inode_number]; // we are adding to this parent dir
 
   memcpy(parent_data_ptr, parent_inode->data[0], BLKSIZE); // reading from disk
   dirent_t* dir_entries = (dirent_t*)parent_data_ptr;
 
-  int entries_count = parent_inode->size / sizeof(dirent_t); // how many entries does the parent dir already have? use this to determine where we write into the array
+
+  int entries_count = parent_inode->size / sizeof(dirent_t); // how many entries currently exist
   dirent_t* new_entry = &dir_entries[entries_count];
 
-  // new dir entry stuff! fill in the info
+  // new dir entry stuff
   new_entry->name_len = strlen(new_dirname);
   strncpy(new_entry->name, new_dirname, sizeof(new_entry->name));
-  new_entry->name[sizeof(new_entry->name) - 1] = '\0';  // adding the null char
+  new_entry->name[sizeof(new_entry->name) - 1] = '\0';
   new_entry->inode = next_inode_num;
-  new_entry->file_type = 2;  // dir
+  new_entry->file_type = 2;
+
+  // only update size after writing the new entry!
+  parent_inode->size = parent_inode->size + sizeof(dirent_t);
 
   // write updates back
   memcpy(parent_inode->data[0], parent_data_ptr, BLKSIZE);
-
-
 
 
   // updating dir's data block on the fs - last step
   void* dir_data_ptr = malloc(BLKSIZE); // for the new dir, give us one block
   memcpy(dir_data_ptr, next_inode->data[0], BLKSIZE); // reading from disk...
 
-  dirent_t* dir_entries = (dirent_t*)dir_data_ptr;
+  dirent_t* dir_entries_new = (dirent_t*)dir_data_ptr;
 
   // parent entry - assuming we cant use strcpy for this assignment since it wasn't explicity specified
-  dir_entries[1].name[0] = '.';
-  dir_entries[1].name[1] = '.';
-  dir_entries[1].name[2] = '\0';  // null terminator
-  dir_entries[1].name_len = strlen(dir_entries[1].name); 
-  dir_entries[1].file_type = 2;
-  dir_entries[1].inode = cur_dir_inode_number;
+  dir_entries_new[1].name[0] = '.';
+  dir_entries_new[1].name[1] = '.';
+  dir_entries_new[1].name[2] = '\0';  // null terminator
+  dir_entries_new[1].name_len = strlen(dir_entries_new[1].name); 
+  dir_entries_new[1].file_type = 2;
+  dir_entries_new[1].inode = cur_dir_inode_number;
 
   // entry about self
-  dir_entries[0].name[0] = '.';
-  dir_entries[0].name[1] = '\0';
-  dir_entries[0].name_len = strlen(dir_entries[0].name); 
-  dir_entries[0].file_type = 2;
-  dir_entries[0].inode = next_inode_num;
+  dir_entries_new[0].name[0] = '.';
+  dir_entries_new[0].name[1] = '\0';
+  dir_entries_new[0].name_len = strlen(dir_entries_new[0].name); 
+  dir_entries_new[0].file_type = 2;
+  dir_entries_new[0].inode = next_inode_num;
 
   // write back
   memcpy(next_inode->data[0], dir_data_ptr, BLKSIZE);
-
+  memcpy(myfs->groupdescriptor.groupdescriptor_info.inode_table, inode_table_ptr, BLKSIZE);
 
   // free those pointers!
   free(parent_data_ptr);
@@ -461,7 +461,6 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
   free(imap_ptr);
   free(dir_data_ptr);
   free(inode_table_ptr);
-
 
   // a return for fun
   return;
