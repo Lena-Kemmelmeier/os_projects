@@ -346,7 +346,7 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
 
 
 
-  
+
   // search for the first location that can be used for next block + use that block
   void* bmap_ptr = malloc(BLKSIZE); // gives us one block of memory
   memcpy(bmap_ptr, &myfs->bmap, BLKSIZE);  // read one block from 'disk' into memory
@@ -428,13 +428,38 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
   memcpy(parent_inode->data[0], parent_data_ptr, BLKSIZE);
 
 
-  
+
+
+  // updating dir's data block on the fs - last step
+  void* dir_data_ptr = malloc(BLKSIZE); // for the new dir, give us one block
+  memcpy(dir_data_ptr, next_inode->data[0], BLKSIZE); // reading from disk...
+
+  dirent_t* dir_entries = (dirent_t*)dir_data_ptr;
+
+  // parent entry - assuming we cant use strcpy for this assignment since it wasn't explicity specified
+  dir_entries[1].name[0] = '.';
+  dir_entries[1].name[1] = '.';
+  dir_entries[1].name[2] = '\0';  // null terminator
+  dir_entries[1].name_len = strlen(dir_entries[1].name); 
+  dir_entries[1].file_type = 2;
+  dir_entries[1].inode = cur_dir_inode_number;
+
+  // entry about self
+  dir_entries[0].name[0] = '.';
+  dir_entries[0].name[1] = '\0';
+  dir_entries[0].name_len = strlen(dir_entries[0].name); 
+  dir_entries[0].file_type = 2;
+  dir_entries[0].inode = next_inode_num;
+
+  // write back
+  memcpy(next_inode->data[0], dir_data_ptr, BLKSIZE);
 
 
   // free those pointers!
   free(parent_data_ptr);
   free(bmap_ptr);
   free(imap_ptr);
+  free(dir_data_ptr);
   free(inode_table_ptr);
 
 
