@@ -317,10 +317,11 @@ void my_crawlfs(myfs_t* myfs) {
 // IMPLEMENT THIS FUNCTION
 void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname) {
 
+  // search for the first location that can be used for next inode + use that inode
   void* imap_ptr = malloc(BLKSIZE); // gives us one block of memory
   memcpy(imap_ptr, &myfs->imap, BLKSIZE);  // read one block from 'disk' into memory
 
-  int next_indode = -1;
+  int next_inode = -1;
   block_t* imap = (block_t*)imap_ptr;
 
   // find the first unused bit in the inode map, set to used
@@ -329,19 +330,54 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
 
       if((imap->data[byte] & (0x1 << bit)) == 0) { // 0 = unused, again - followed directions and copied this from the implementation above
         imap->data[byte] |= (0x1 << bit); // set bit as 1 (used) - looked
-        next_indode = byte * 8 + bit; // calculate the inode number
+        next_inode = byte * 8 + bit; // calculate the inode number
         break; // break from the inner loop
       }
     }
 
     // break from the outer for loop too!
-    if(next_indode != -1){ // we found (first) unused bit
+    if(next_inode != -1){ // we found (first) unused bit
       break;
     }
   }
 
-  
+  // write out to disk
+  memcpy(&myfs->imap, imap_ptr, BLKSIZE);
 
+
+
+  // search for the first location that can be used for next block + use that block
+  void* bmap_ptr = malloc(BLKSIZE); // gives us one block of memory
+  memcpy(bmap_ptr, &myfs->bmap, BLKSIZE);  // read one block from 'disk' into memory
+
+  int next_block = -1;
+  block_t* bmap = (block_t*)bmap_ptr;
+
+  // find the first unused bit in the inode map, set to used
+  for(size_t byte = 0; byte < BLKSIZE; ++byte){ // loop over the bytes, I took this from this implementation from functions above
+    for(int bit = 0; bit < 8; ++bit) { // loop over the bits, again, took this from the implementation above as well
+
+      if((bmap->data[byte] & (0x1 << bit)) == 0) { // 0 = unused, again - followed directions and copied this from the implementation above
+        bmap->data[byte] |= (0x1 << bit); // set bit as 1 (used) - looked
+        next_block = byte * 8 + bit; // calculate the inode number
+        break; // break from the inner loop
+      }
+    }
+
+    // break from the outer for loop too!
+    if(next_block != -1){ // we found (first) unused bit
+      break;
+    }
+  }
+
+  // write out to disk
+  memcpy(&myfs->bmap, bmap_ptr, BLKSIZE);
+
+
+
+  // free those pointers
+  free(bmap_ptr);
+  free(imap_ptr);
 }
 
 
