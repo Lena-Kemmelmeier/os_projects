@@ -346,6 +346,7 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
 
 
 
+  
   // search for the first location that can be used for next block + use that block
   void* bmap_ptr = malloc(BLKSIZE); // gives us one block of memory
   memcpy(bmap_ptr, &myfs->bmap, BLKSIZE);  // read one block from 'disk' into memory
@@ -372,6 +373,8 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
 
   // write out to disk
   memcpy(&myfs->bmap, bmap_ptr, BLKSIZE);
+
+
 
 
   // modifying the inode table
@@ -404,14 +407,37 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
 
 
 
+  // updating parent's dir data
+  void* parent_data_ptr = malloc(BLKSIZE); // give us one block
+  inode_t* parent_inode = &inode_table[cur_dir_inode_number]; // we are adding to this parent dir
+
+  memcpy(parent_data_ptr, parent_inode->data[0], BLKSIZE); // reading from disk
+  dirent_t* dir_entries = (dirent_t*)parent_data_ptr;
+
+  int entries_count = parent_inode->size / sizeof(dirent_t); // how many entries does the parent dir already have? use this to determine where we write into the array
+  dirent_t* new_entry = &dir_entries[entries_count];
+
+  // new dir entry stuff! fill in the info
+  new_entry->name_len = strlen(new_dirname);
+  strncpy(new_entry->name, new_dirname, sizeof(new_entry->name));
+  new_entry->name[sizeof(new_entry->name) - 1] = '\0';  // adding the null char
+  new_entry->inode = next_inode_num;
+  new_entry->file_type = 2;  // dir
+
+  // write updates back
+  memcpy(parent_inode->data[0], parent_data_ptr, BLKSIZE);
+
+
   
 
 
   // free those pointers!
+  free(parent_data_ptr);
   free(bmap_ptr);
   free(imap_ptr);
   free(inode_table_ptr);
 
+
+  // a return for fun
+  return;
 }
-
-
