@@ -321,7 +321,7 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
   void* imap_ptr = malloc(BLKSIZE); // gives us one block of memory
   memcpy(imap_ptr, &myfs->imap, BLKSIZE);  // read one block from 'disk' into memory
 
-  int next_inode = -1;
+  int next_inode_num = -1;
   block_t* imap = (block_t*)imap_ptr;
 
   // find the first unused bit in the inode map, set to used
@@ -330,13 +330,13 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
 
       if((imap->data[byte] & (0x1 << bit)) == 0) { // 0 = unused, again - followed directions and copied this from the implementation above
         imap->data[byte] |= (0x1 << bit); // set bit as 1 (used) - looked
-        next_inode = byte * 8 + bit; // calculate the inode number
+        next_inode_num = byte * 8 + bit; // calculate the inode number
         break; // break from the inner loop
       }
     }
 
     // break from the outer for loop too!
-    if(next_inode != -1){ // we found (first) unused bit
+    if(next_inode_num != -1){ // we found (first) unused bit
       break;
     }
   }
@@ -374,10 +374,44 @@ void my_creatdir(myfs_t* myfs, int cur_dir_inode_number, const char* new_dirname
   memcpy(&myfs->bmap, bmap_ptr, BLKSIZE);
 
 
+  // modifying the inode table
+  void* inode_table_ptr = malloc(BLKSIZE); // gives us one block of memory
+  memcpy(inode_table_ptr, &myfs->groupdescriptor.groupdescriptor_info.inode_table, BLKSIZE);  // read one block from 'disk' into memory
 
-  // free those pointers
+  inode_t* inode_table = (inode_t*)inode_table_ptr;
+
+  // edit the parent dir inode - we're adding one direcrtoy
+  inode_t* parent_inode = &inode_table[cur_dir_inode_number];
+  parent_inode->size = parent_inode->size + sizeof(dirent_t);
+
+  // initialize new dir inode - this time we have two new entries to add
+  inode_t* next_inode = &inode_table[cur_dir_inode_number];
+  next_inode->size = sizeof(dirent_t) * 2;
+  next_inode->blocks = 1;
+
+  // setting up the data block pointers - assuming all direct for this assignment's simplicity
+  for (uint i=1; i<15; ++i){ // took this from above implementation, like the assignment suggested
+    next_inode->data[i] = NULL;
+  }
+
+  // assigning data block for the new dir inode
+  block_t* block_array = myfs->groupdescriptor.groupdescriptor_info.block_data;
+  next_inode->data[0] = &block_array[next_block]; // assigning first dala block for this inode
+
+  // write out to disk
+  memcpy(myfs->groupdescriptor.groupdescriptor_info.inode_table, inode_table_ptr, BLKSIZE);
+
+
+
+
+  
+
+
+  // free those pointers!
   free(bmap_ptr);
   free(imap_ptr);
+  free(inode_table_ptr);
+
 }
 
 
